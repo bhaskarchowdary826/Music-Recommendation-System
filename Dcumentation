@@ -1,0 +1,82 @@
+Data Preparation
+
+The first step is to load the dataset into a pandas DataFrame using pd.read_csv('data.csv'). The dataset should be in a CSV format, with each row representing a song and columns containing various audio features and the liked column indicating whether the song was repeatedly listened to or not.
+
+The features and target variable are then separated using:
+
+python
+
+
+Copy code
+X = data.drop('liked', axis=1)
+y = data['liked']
+This creates two new DataFrames/Series: X containing all the feature columns, and y containing the target variable 'liked'.
+
+Train-Test Split
+
+To evaluate the performance of the model, we split the data into training and test sets using train_test_split from sklearn.model_selection:
+
+python
+
+
+Copy code
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+This splits the data into training (80%) and test (20%) sets, while ensuring a consistent split across runs by setting random_state=42.
+
+Model Training
+
+We then create a logistic regression model using LogisticRegression from sklearn.linear_model and train it on the training data:
+
+python
+
+
+Copy code
+model = LogisticRegression()
+model.fit(X_train, y_train)
+Model Evaluation
+
+After training the model, we make predictions on the test set using model.predict(X_test). We then evaluate the model's performance using accuracy and F1 score:
+
+python
+
+
+Copy code
+accuracy = accuracy_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+These metrics give us an idea of how well the model is performing on unseen data.
+
+Recommendation Function
+
+The get_recommendations function takes a user's song history as input (a DataFrame with the same columns as the original dataset) and returns the songs that the model predicts the user will like.
+
+python
+
+
+Copy code
+def get_recommendations(user_songs):
+    user_songs = user_songs.drop('liked', axis=1)
+    predicted_liked = model.predict(user_songs)
+    recommended_songs = user_songs[predicted_liked == 1]
+    return recommended_songs
+It works by:
+
+Dropping the 'liked' column from the input DataFrame.
+Using the trained model to make predictions on whether the user will like each song or not (model.predict(user_songs)).
+Filtering the input DataFrame to only include the songs that were predicted as liked (user_songs[predicted_liked == 1]).
+Returning the filtered DataFrame containing the recommended songs.
+Example Usage
+
+The code demonstrates how to use the get_recommendations function by passing the first 10 songs from the dataset as an example user's song history:
+
+python
+
+
+Copy code
+user_songs = data.head(10)
+recommended_songs = get_recommendations(user_songs)
+print("Recommended Songs:")
+print(recommended_songs)
+This will print the recommended songs for the example user based on the trained model.
+
+Note that this is a basic example, and in a production environment, you would likely need to consider additional factors such as cold-start problems, handling implicit feedback, and updating the model as new data becomes available.
+
